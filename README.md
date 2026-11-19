@@ -1,364 +1,251 @@
-# Student Grade Tracker (Java Console Application with File Handling)
-
-A complete, beginner-friendly, and robust **Java Console Application** designed to manage, calculate, analyze, and permanently persist student marks and grades. Built adhering to core **Object-Oriented Programming (OOP)** principles and standard Java SDK components (`java.io`, `java.util.ArrayList`, `java.util.Scanner`).
-
----
-
-## 📋 Table of Contents
-1. [Project Overview](#-project-overview)
-2. [Key Features & Upgrades](#-key-features--upgrades)
-3. [File Handling & Persistence Architecture](#-file-handling--persistence-architecture)
-4. [Duplicate Student ID Prevention](#-duplicate-student-id-prevention)
-5. [Object-Oriented Programming (OOP) Architecture](#-object-oriented-programming-oop-architecture)
-6. [Grading Scale](#-grading-scale)
-7. [Project Structure](#-project-structure)
-8. [Prerequisites & How to Run](#-prerequisites--how-to-run)
-9. [10 Menu Options & User Guide](#-10-menu-options--user-guide)
-10. [Sample Execution & Console Output](#-sample-execution--console-output)
-11. [Exception Handling & Robust Validation](#-exception-handling--robust-validation)
+# Console-Based Stock Trading Platform
+> **Java Programming Internship Project**  
+> An educational, console-based stock trading simulation and real-time portfolio management application built exclusively with **Core Java (Java SE)**.
 
 ---
 
-## 🌟 Project Overview
-The **Student Grade Tracker** allows educators, instructors, and academic administrators to record, evaluate, and track student academic performance. 
+## 📌 Executive Summary
 
-In this upgraded version, all student records are **permanently saved to a flat file (`students.txt`)** and **automatically loaded on application startup**. Changes made through adding, updating, or deleting students are immediately synchronized to disk, preventing data loss across sessions.
+The **Console-Based Stock Trading Platform** is a complete, beginner-friendly simulation application designed to teach real-world stock market fundamentals—including buying, selling, weighted-average position calculation, market price fluctuations, and historical portfolio performance tracking over time.
 
----
-
-## ✨ Key Features & Upgrades
-
-- **Permanent File Handling (`students.txt`)**: 
-  - Automatically loads existing records into memory when the program starts.
-  - Automatically persists new, updated, and deleted records to disk.
-  - Safely saves all records upon exiting.
-- **Duplicate Student ID Prevention**:
-  - Enforces uniqueness for every Student ID.
-  - Prevents users from manually entering an existing ID.
-  - Auto-increments and auto-assigns guaranteed unique IDs if user prefers automatic numbering.
-  - Filters out duplicate records during file loading and logs descriptive warnings.
-- **Complete 10-Option Menu**:
-  - Preserves all 6 analytical and reporting features.
-  - Adds dedicated options to **Search Student by ID**, **Update Student Record**, and **Delete Student Record**.
-  - Provides a safe **Exit** option that confirms file synchronization.
-- **Automated Grade Recalculation**:
-  - Computes standard letter grades (`A+`, `A`, `B`, `C`, `D`, `F`) based on marks.
-  - Automatically recalculates grades whenever marks are updated.
-- **Class Analytics & Summary Reports**:
-  - Computes class average marks.
-  - Identifies top scorer(s) and lowest scorer(s), gracefully handling ties.
-  - Generates grade distribution tables and overall passing percentages.
-- **Comprehensive Exception Handling**:
-  - Uses `try-with-resources` to prevent resource leaks (`BufferedReader`, `BufferedWriter`).
-  - Catches and recovers from `FileNotFoundException`, `IOException`, `SecurityException`, `NumberFormatException`, and `IllegalArgumentException`.
-  - Tolerates corrupted lines or invalid values in `students.txt` without crashing.
+### 🎯 Key Internship Constraints & Requirements Fulfilled
+1. **Core Java Only**: Pure Java SE standard library. Zero external frameworks, zero Spring Boot, zero external databases, and zero live external APIs.
+2. **Strict OOP Design**: Proper encapsulation, separation of concerns, abstraction, and modularity across model, service, controller, and persistence layers.
+3. **Optimized Collections**: Utilizes `ArrayList` and `HashMap` appropriately for $O(1)$ fast lookups and formatted table iteration.
+4. **Permanent File Handling**: Custom text-based storage engine using `BufferedReader` and `BufferedWriter` with `UTF-8` encoding to save and restore all user data across sessions.
+5. **Virtual Capital & Safety**: Seeded with an initial virtual balance of **₹100,000.00**. Completely educational—does not connect to real financial markets or risk real money.
 
 ---
 
-## 💾 File Handling & Persistence Architecture
+## 📂 Project Architecture
 
-### File Specification
-- **File Name**: `students.txt`
-- **Location**: Root directory of the application
-- **Format**: Comma-Separated Values (CSV)
-  ```csv
-  id,name,marks,grade
-  ```
-
-### Example `students.txt`
-```text
-101,Alice Johnson,94.50,A+
-102,Bob Smith,82.00,A
-103,Charlie Brown,73.50,B
-104,David Miller,45.00,F
 ```
-
-### Persistence Lifecycle
-1. **Startup (Load)**: When `Main` initializes, `loadStudentsFromFile()` reads `students.txt` line by line, parses valid records via `Student.fromFileString(line)`, skips malformed or duplicate lines with descriptive warnings, and populates `studentList`.
-2. **Runtime Sync**: Whenever a student is added (Option 1), edited (Option 8), or deleted (Option 9), `saveStudentsToFile()` immediately writes the entire list to `students.txt`.
-3. **Shutdown (Exit)**: When Option 10 (Exit) is selected, `saveStudentsToFile()` performs a final write pass to guarantee file integrity.
-
----
-
-## 🛡 Duplicate Student ID Prevention
-
-Student ID is the unique primary identifier in the system. Duplicate IDs are strictly prevented at multiple levels:
-
-1. **Manual Entry Validation**: When entering a Student ID during Option 1, the program checks `GradeCalculator.isIdDuplicate(studentList, id)`. If an ID is already taken:
-   ```text
-   [!] Error: Student with ID 101 already exists! Duplicate student IDs are not allowed. Please enter a different ID.
-   ```
-2. **Auto-Assignment Option**: Pressing `Enter` at the ID prompt automatically assigns the next available unique ID (e.g. `105`), calculated by finding the lowest available ID not present in the system.
-3. **File Load Verification**: If `students.txt` is externally edited or corrupted with a duplicate ID, `loadStudentsFromFile()` detects it, logs a warning with the exact line number, and skips the duplicate record.
-
----
-
-## 🏛 Object-Oriented Programming (OOP) Architecture
-
-The project adheres to clean software design and OOP principles:
-
-### 1. Model & Encapsulation (`Student.java`)
-- Attributes (`id`, `name`, `marks`, `grade`) are declared `private`.
-- Accessed and modified strictly through public getters and setters.
-- Implements:
-  - `toFileString()`: Formats student attributes into CSV records for file storage.
-  - `fromFileString(String line)`: Static factory method parsing and validating CSV records from `students.txt`.
-  - `toString()`: Overridden to format student data as a clean tabular row.
-
-### 2. Service & Business Logic (`GradeCalculator.java`)
-- Separates analytical logic from UI and storage.
-- Static methods include:
-  - `calculateGrade(double marks)`: Maps numerical marks (0–100) to letter grades.
-  - `calculateAverage(ArrayList<Student> students)`: Calculates class mean score.
-  - `getHighestMarks(ArrayList<Student> students)` & `getLowestMarks(ArrayList<Student> students)`.
-  - `getHighestScorers(ArrayList<Student> students)` & `getLowestScorers(ArrayList<Student> students)`.
-  - `findStudentById(ArrayList<Student> students, int id)`: Performs fast student ID lookups.
-  - `isIdDuplicate(ArrayList<Student> students, int id)`: Checks ID uniqueness.
-  - `printStudentTable(ArrayList<Student> students)` & `displaySummaryReport(ArrayList<Student> students)`.
-
-### 3. Controller & Presentation (`Main.java`)
-- Coordinates the console lifecycle and user interaction.
-- Handles file I/O operations (`loadStudentsFromFile()`, `saveStudentsToFile()`).
-- Houses user input validation helper methods using `java.util.Scanner`.
-
----
-
-## 📊 Grading Scale
-
-| Marks Range (%) | Letter Grade | Performance Level | Status |
-| :---: | :---: | :---: | :---: |
-| **90.00 – 100.00** | **A+** | Outstanding | Pass |
-| **80.00 – 89.99**  | **A**  | Excellent   | Pass |
-| **70.00 – 79.99**  | **B**  | Very Good   | Pass |
-| **60.00 – 69.99**  | **C**  | Good        | Pass |
-| **50.00 – 59.99**  | **D**  | Pass        | Pass |
-| **Below 50.00**    | **F**  | Fail        | Fail |
-
----
-
-## 📁 Project Structure
-
-```text
-StudentGradeTracker/
+StockTradingPlatform/
 │
-├── Student.java           # Model class (Encapsulation, file serialization)
-├── GradeCalculator.java   # Business logic, query methods, and analytics
-├── Main.java              # Console UI, menu dispatch, file handling, and validation
-├── students.txt           # Permanent flat-file storage for student records
-└── README.md              # Complete project documentation and guide
+├── Stock.java                 # Model: Stock symbol, company name, simulated price, fluctuations
+├── Holding.java               # Model: Portfolio position tracking, weighted average buy price
+├── Transaction.java           # Model: Immutable audit record of BUY/SELL trades
+├── PerformanceSnapshot.java   # Model: Historical snapshot record for performance over time
+│
+├── StockMarket.java           # Service: Simulated market catalog, price quotes & tick fluctuations
+├── Portfolio.java             # Service: Position management, valuation & financial analytics
+├── DataManager.java           # Persistence: UTF-8 File I/O for saving & restoring disk data
+├── TradingPlatform.java       # Controller: Business logic coordinator, validations & workflow
+├── Main.java                  # Presentation: Interactive console UI, status bar & menu loop
+│
+├── run.bat                    # Windows Command Prompt 1-click build & launch script (UTF-8)
+├── run.ps1                    # Windows PowerShell launcher script
+├── README.md                  # Comprehensive project documentation & internship report
+│
+└── data/                      # Permanent Storage Directory (Auto-generated)
+    ├── account.txt            # Current cash balance & starting capital
+    ├── portfolio.txt          # Active stock holdings & weighted average prices
+    ├── transactions.txt       # Chronological audit log of all completed trades
+    ├── performance_history.txt# Historical snapshots of account valuation over time
+    └── market.txt             # Latest simulated stock quotes
 ```
 
 ---
 
-## 🚀 Prerequisites & How to Run
+## 🏗️ Object-Oriented Programming (OOP) Principles
+
+| OOP Principle | Implementation in Project |
+| :--- | :--- |
+| **Encapsulation** | All classes (`Stock`, `Holding`, `Transaction`, `PerformanceSnapshot`, etc.) use private fields with strictly validated public getters and setters. Mutable state cannot be modified directly from outside. |
+| **Data Abstraction** | High-level controllers (`TradingPlatform`, `Main`) interact with clean interfaces like `portfolio.addShares()`, `market.refreshPrices()`, and `dataManager.saveAccount()` without worrying about underlying array mechanics or file byte streams. |
+| **Single Responsibility** | Each class has one focused duty: `StockMarket` manages quotes, `Portfolio` calculates returns, `DataManager` manages disk files, and `Main` formats console output. |
+| **Information Hiding** | Cost basis recalculation and file parsing logic are hidden within private methods and factory deserializers (`fromDataString`). |
+
+---
+
+## 📊 Data Structures Used
+
+- **`HashMap<String, Stock>`**: Enables instantaneous $O(1)$ lookup of stocks by ticker symbol (e.g. `TCS`, `INFY`) during buy orders and portfolio valuation queries.
+- **`HashMap<String, Holding>`**: Provides $O(1)$ access and updates to user holdings when adding or selling shares of an existing position.
+- **`ArrayList<Stock>`**: Preserves display ordering for market catalog listings.
+- **`ArrayList<Holding>`**: Enables tabular iteration over active portfolio positions.
+- **`ArrayList<Transaction>`**: Maintains an ordered, chronological audit trail of all buy and sell orders.
+- **`ArrayList<PerformanceSnapshot>`**: Stores timeline snapshots tracking account growth over time.
+
+---
+
+## 🧮 Financial Formulas & Calculations
+
+### 1. Weighted Average Purchase Price (Buying Additional Shares)
+When buying additional shares of an already-owned stock, the new cost basis per share is computed as:
+$$\text{New Average Price} = \frac{(\text{Current Qty} \times \text{Old Avg Price}) + (\text{New Qty} \times \text{Purchase Price})}{\text{Current Qty} + \text{New Qty}}$$
+
+### 2. Total Portfolio Market Value
+$$\text{Total Portfolio Value} = \sum (\text{Holding Quantity} \times \text{Current Market Price})$$
+
+### 3. Total Account Value
+$$\text{Total Account Value} = \text{Available Cash Balance} + \text{Total Portfolio Value}$$
+
+### 4. Overall Profit / Loss
+$$\text{Profit or Loss} = \text{Total Account Value} - \text{Initial Investment Capital (₹100,000)}$$
+
+### 5. Overall Profit / Loss Percentage
+$$\text{Profit or Loss \%} = \left(\frac{\text{Profit or Loss}}{\text{Initial Investment Capital}}\right) \times 100$$
+
+### 6. Realized Profit / Loss (Selling Shares)
+$$\text{Realized P/L} = (\text{Selling Price} - \text{Average Purchase Price}) \times \text{Quantity Sold}$$
+
+---
+
+## 🚀 Step-by-Step Feature Walkthrough
+
+### 1. Initial Virtual Balance
+- Starts with **₹100,000.00** on first launch.
+- If saved data exists in `data/account.txt`, restores the exact saved balance.
+- Displayed prominently in the persistent status bar at the top of the menu.
+
+### 2. Stock Market Catalog
+Contains prominent simulated Indian equities:
+| Symbol | Stock Name | Initial Simulated Price |
+| :--- | :--- | :--- |
+| **TCS** | Tata Consultancy Services | ₹3,500.00 |
+| **INFY** | Infosys Limited | ₹1,500.00 |
+| **RELIANCE** | Reliance Industries | ₹2,800.00 |
+| **HDFCBANK** | HDFC Bank | ₹1,700.00 |
+| **WIPRO** | Wipro Limited | ₹500.00 |
+| **ICICIBANK** | ICICI Bank Limited | ₹1,100.00 |
+| **ITC** | ITC Limited | ₹450.00 |
+| **TATAMOTORS** | Tata Motors Limited | ₹950.00 |
+| **SBIN** | State Bank of India | ₹800.00 |
+| **BHARTIARTL** | Bharti Airtel Limited | ₹1,300.00 |
+
+### 3. Buying Stocks
+- Case-insensitive symbol entry (`tcs` or `TCS`).
+- Comprehensive input validation: rejects negative quantities, non-integer inputs, and unlisted symbols.
+- Checks available balance and prevents exceeding cash; informs user of the maximum affordable shares.
+- Updates average price, deducts cash, logs transaction, triggers snapshot, and saves to disk.
+
+### 4. Selling Stocks
+- Displays currently owned stocks with quantity and live quotes.
+- Verifies holding exists and requested quantity $\le$ owned quantity.
+- Calculates proceeds, updates balance, reduces shares (removes position if quantity reaches 0).
+- Computes realized profit/loss, records transaction, triggers snapshot, and saves to disk.
+
+### 5. Simulated Market Volatility
+- Menu option `5` triggers a market price fluctuation tick.
+- Simulates realistic random price movements between **-5.0% and +5.0%**.
+- **Safety Floor**: Stock prices are mathematically guaranteed to never drop to zero or negative (enforces a minimum ₹5.00 floor).
+- Automatically recalculates portfolio values and takes a performance snapshot.
+
+### 6. Historical Performance Tracking Over Time
+Snapshots are permanently recorded upon:
+1. Account initialization / reset
+2. Successful BUY transactions
+3. Successful SELL transactions
+4. Market price refresh ticks
+
+Each snapshot captures:
+- Timestamp (`YYYY-MM-DD HH:MM:SS`)
+- Trigger event description
+- Available Cash Balance
+- Portfolio Market Value
+- Total Account Value
+- Overall Profit / Loss (₹ and %)
+
+---
+
+## 💻 How to Compile and Run
 
 ### Prerequisites
-- **Java Development Kit (JDK 8 or later)** installed.
-- Verify installation by opening a terminal / Command Prompt:
-  ```bash
-  javac -version
-  java -version
-  ```
+- Java Development Kit (JDK 8, 11, 17, or 21+) installed.
 
-> **Note for Windows Users**: If `javac` or `java` is not recognized, configure your `PATH` environment variable or point to your JDK directory:
-> ```powershell
-> # Example for PowerShell with JDK in user home:
-> $env:PATH += ";$env:JAVA_HOME\bin"
-> ```
+### Option A: 1-Click Launchers (Windows)
+- **Command Prompt**: Double-click or run `run.bat`
+- **PowerShell**: Run `./run.ps1`
 
-### Compilation
-Navigate to the project root directory and compile all Java source files:
+### Option B: Manual Command Line Execution
 ```bash
-javac *.java
-```
-This produces `Student.class`, `GradeCalculator.class`, and `Main.class`.
+# 1. Navigate to the project root directory
+cd StockTradingPlatform
 
-### Execution
-Run the compiled application:
-```bash
-java Main
+# 2. Compile all Java source files with UTF-8 encoding
+javac -encoding UTF-8 *.java
+
+# 3. Run the application
+java -Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 Main
+```
+
+### Option C: In Any IDE (VS Code / IntelliJ IDEA / Eclipse)
+1. Open the `StockTradingPlatform` folder in your IDE.
+2. Locate `Main.java`.
+3. Click **Run** or press `Shift + F10` (IntelliJ) / `F5` (VS Code).
+
+---
+
+## 🖥️ Sample Console Demonstration
+
+```text
+==========================================================================================
+*                     CONSOLE-BASED STOCK TRADING PLATFORM                               *
+*                   Core Java Simulation & Portfolio Tracker                             *
+==========================================================================================
+[+] Restored existing session data successfully.
+[+] Current Available Cash Balance: ₹77,511.80
+[+] Active Portfolio Holdings: 1
+[+] Total Past Transactions: 2
+
++-----------------------------------------------------------------------------------------+
+| CASH: ₹77511.80     | PORTFOLIO: ₹22535.40     | TOTAL: ₹100047.20    | P/L: +₹47.20 (+0.05%)    |
++-----------------------------------------------------------------------------------------+
+================================== MAIN MENU ==================================
+  1. View Stock Market Quotes
+  2. Buy Stocks
+  3. Sell Stocks
+  4. View Portfolio & Profit / Loss Summary
+  5. Refresh Market Prices (Simulate Market Fluctuations)
+  6. View Transaction Audit History
+  7. View Portfolio Performance Tracking Snapshots
+  8. Reset Account Data (Start Fresh Virtual Simulation)
+  9. Save & Exit Platform
+===============================================================================
+```
+
+### Portfolio & Financial Summary Output
+```text
++===================================================================================================================================+
+|                                                        USER PORTFOLIO                                                             |
++------------+--------------------------------+-----+-------------+--------------+-------------+--------------+---------------------+
+| Symbol     | Stock Name                     | Qty | Avg Price   | Total Cost   | Mkt Price   | Market Value | Profit / Loss (₹, %) |
++------------+--------------------------------+-----+-------------+--------------+-------------+--------------+---------------------+
+| INFY       | Infosys Limited                |  15 | ₹   1500.00 | ₹   22500.00 | ₹   1502.36 | ₹   22535.40 | +₹35.40 (+0.16%)    |
++------------+--------------------------------+-----+-------------+--------------+-------------+--------------+---------------------+
+
++--------------------------------------------------------------------------------+
+|                     FINANCIAL & PROFIT / LOSS SUMMARY                          |
++--------------------------------------------------------------------------------+
+| Total Invested in Stocks (Cost Basis) : ₹       22,500.00                     |
+| Current Portfolio Market Value        : ₹       22,535.40                     |
+| Available Cash Balance                : ₹       77,511.80                     |
++--------------------------------------------------------------------------------+
+| Total Account Value (Cash + Stocks)   : ₹      100,047.20                     |
+| Initial Investment Capital            : ₹      100,000.00                     |
++--------------------------------------------------------------------------------+
+| Overall Profit / Loss (PROFIT)        :         +₹47.20                       |
+| Overall Profit / Loss Percentage      :          +0.05%                       |
++--------------------------------------------------------------------------------+
 ```
 
 ---
 
-## 📖 10 Menu Options & User Guide
+## 🛡️ Input Validation & Error Handling Checklist
 
-When launched, the program displays the 10-option main menu:
-
-```text
--------------------- MAIN MENU --------------------
- 1. Add Student
- 2. View All Students
- 3. Calculate Average
- 4. Find Highest Marks
- 5. Find Lowest Marks
- 6. Display Summary Report
- 7. Search Student by ID
- 8. Update Student Record
- 9. Delete Student Record
- 10. Exit
----------------------------------------------------
-Enter your choice (1-10): 
-```
-
-| Option | Feature | Description |
-| :---: | :--- | :--- |
-| **1** | **Add Student** | Enter a unique ID (or press Enter to auto-assign), student name, and marks (0–100). The grade is assigned instantly and saved to `students.txt`. |
-| **2** | **View All Students** | Displays a formatted tabular view of all registered students (ID, Name, Marks, Grade). |
-| **3** | **Calculate Average** | Calculates and prints class average score and overall letter grade. |
-| **4** | **Find Highest Marks** | Identifies the top score and lists all students who achieved it. |
-| **5** | **Find Lowest Marks** | Identifies the lowest score and lists all students who received it. |
-| **6** | **Display Summary Report** | Generates an analytical report with enrollment count, average, highest/lowest, pass rate (%), and grade distribution. |
-| **7** | **Search Student by ID** | Searches for a student by their ID and displays their complete record. |
-| **8** | **Update Student Record** | Modifies a student's Name, Marks, or Both. Marks updates automatically recalculate the grade and persist changes to `students.txt`. |
-| **9** | **Delete Student Record** | Removes a student record by ID after user confirmation (`y/n`) and syncs changes to `students.txt`. |
-| **10** | **Exit** | Saves all current records to `students.txt` and closes the application safely. |
+- [x] **Non-numeric input for quantities**: Trapped with try-catch `NumberFormatException` without crashing.
+- [x] **Negative & zero quantities**: Denied with clear user feedback.
+- [x] **Exceeding cash balance**: Calculates maximum affordable shares and prevents transaction.
+- [x] **Selling unowned stocks**: Prevented with clear warning.
+- [x] **Selling more shares than owned**: Restricted with maximum allowable share limit.
+- [x] **Invalid stock symbols**: Case-insensitive validation against market registry.
+- [x] **File corruption safety**: Graceful fallback to default virtual capital if files are missing or empty.
+- [x] **Reset safeguard**: Requires explicit confirmation (`RESET`) before clearing files.
 
 ---
 
-## 🖥 Sample Execution & Console Output
-
-### 1. Application Launch & Auto-Loading
-```text
-=======================================================
-           STUDENT GRADE TRACKER SYSTEM               
-       Object-Oriented Java Console Application        
-=======================================================
-[INFO] Successfully loaded 4 student record(s) from 'students.txt'.
-```
-
-### 2. Option 1: Adding a Student with Duplicate ID Prevention
-```text
-Enter your choice (1-10): 1
-
---- [1] Add New Student ---
-Enter Student ID (or press Enter to auto-assign [105]): 101
-[!] Error: Student with ID 101 already exists! Duplicate student IDs are not allowed. Please enter a different ID.
-Enter Student ID (or press Enter to auto-assign [105]): 
-No ID entered. Auto-assigned Student ID: 105
-Enter Student Name: Emily Watson
-Enter Marks (0 - 100): 88.5
-
-[SUCCESS] Student added successfully and saved to 'students.txt'!
-    ID: 105 | Name: Emily Watson | Marks: 88.50 | Grade: A
-```
-
-### 3. Option 2: Viewing All Students (Tabular Format)
-```text
-Enter your choice (1-10): 2
-
---- [2] View All Students ---
-Total records: 5
-
-+--------+------------------------+----------+--------+
-| ID     | Name                   | Marks    | Grade  |
-+--------+------------------------+----------+--------+
-| 101    | Alice Johnson          | 94.50    | A+     |
-| 102    | Bob Smith              | 82.00    | A      |
-| 103    | Charlie Brown          | 73.50    | B      |
-| 104    | David Miller           | 45.00    | F      |
-| 105    | Emily Watson           | 88.50    | A      |
-+--------+------------------------+----------+--------+
-```
-
-### 4. Option 7: Searching Student by ID
-```text
-Enter your choice (1-10): 7
-
---- [7] Search Student by ID ---
-Enter Student ID to search: 103
-
-[RESULT] Student Record Found:
-+--------+------------------------+----------+--------+
-| ID     | Name                   | Marks    | Grade  |
-+--------+------------------------+----------+--------+
-| 103    | Charlie Brown          | 73.50    | B      |
-+--------+------------------------+----------+--------+
-```
-
-### 5. Option 8: Updating Student Record
-```text
-Enter your choice (1-10): 8
-
---- [8] Update Student Record ---
-Enter Student ID to update: 104
-
-Current Details:
-  ID: 104 | Name: David Miller | Marks: 45.00 | Grade: F
-
-What would you like to update?
- 1. Update Name
- 2. Update Marks (Recalculates Grade)
- 3. Update Both Name and Marks
- 4. Cancel
-Enter your choice (1-4): 2
-Enter New Marks (0 - 100): 55.0
-
-[SUCCESS] Student record updated successfully and saved to 'students.txt'!
-    Updated Record -> ID: 104 | Name: David Miller | Marks: 55.00 | Grade: D
-```
-
-### 6. Option 9: Deleting a Student Record
-```text
-Enter your choice (1-10): 9
-
---- [9] Delete Student Record ---
-Enter Student ID to delete: 103
-Found: Charlie Brown (ID: 103 | Marks: 73.50 | Grade: B)
-Are you sure you want to delete this record? (y/n): y
-
-[SUCCESS] Student ID 103 ('Charlie Brown') removed successfully and changes saved to 'students.txt'!
-```
-
-### 7. Option 6: Comprehensive Performance Summary
-```text
-=======================================================
-            STUDENT PERFORMANCE SUMMARY REPORT         
-=======================================================
- Total Students Enrolled : 4
- Class Average Marks     : 80.00 / 100 (Grade: A)
- Highest Marks Scored    : 94.50 / 100
- Lowest Marks Scored     : 55.00 / 100
- Passing Percentage      : 100.00% (4 Passed, 0 Failed)
--------------------------------------------------------
- Top Scorer(s):
-   - Alice Johnson (ID: 101) -> 94.50 Marks [Grade A+]
- Lowest Scorer(s):
-   - David Miller (ID: 104) -> 55.00 Marks [Grade D]
--------------------------------------------------------
- Grade Distribution:
-   A+ (90-100) : 1 student(s)
-   A  (80-89)  : 2 student(s)
-   B  (70-79)  : 0 student(s)
-   C  (60-69)  : 0 student(s)
-   D  (50-59)  : 1 student(s)
-   F  (<50)    : 0 student(s)
-=======================================================
-```
-
----
-
-## 🛡 Exception Handling & Robust Validation
-
-The program is engineered to withstand invalid inputs and file corruption without crashing:
-
-| Exception / Scenario | Trigger Condition | Handled Response |
-| :--- | :--- | :--- |
-| **Missing `students.txt`** | Program run for the first time without an existing file | Informs user gracefully (`[INFO] 'students.txt' not found`) and creates the file on first save. |
-| **File I/O Error (`IOException`)** | Read or write failure due to disk or locked file | Catches exception and prints clear error diagnostic without halting the program. |
-| **Permission Denied (`SecurityException`)** | Read/write permission restricted on filesystem | Caught and reported cleanly to the user. |
-| **Corrupted Line in File** | Line with missing fields or non-numeric tokens | Line is skipped, exact line number and reason logged, and remaining valid records are loaded. |
-| **Duplicate ID in File** | File edited to contain two identical IDs | Duplicate record skipped, warning logged with line number, unique record preserved. |
-| **Duplicate ID on Input** | User enters an ID already assigned to a student | Rejects input and requests a unique ID. |
-| **Non-Numeric Menu / Marks** | Entering text like `abc` or symbols for numbers | Handled via `NumberFormatException` loops without crashing. |
-| **Marks Out of Bounds** | Values `< 0.0` or `> 100.0` | Rejected with range error (`Marks must be between 0.00 and 100.00`). |
-| **Empty Student Name** | Entering blank spaces or empty line | Rejected with prompt to enter a non-empty name. |
-| **Empty Record Action** | Selecting Options 2–9 when no records exist | Displays user-friendly message (`No student records found`). |
-
----
-
-## 👨‍💻 Submission Notes
-- **Language**: Java (SE 8+)
-- **Storage**: Persistent flat-file storage (`students.txt`) with in-memory `ArrayList<Student>`
-- **Architecture**: Object-Oriented Programming (Model-Service-Controller)
-- **Dependencies**: None (Pure Java Standard SDK)
+## 👨‍💻 Author & Academic Attribution
+- **Internship Project**: Java Programming Internship
+- **Technology Stack**: Core Java (JDK 21 LTS), OOP, Collections (`ArrayList`, `HashMap`), Java File I/O (`BufferedReader`, `BufferedWriter`)
+- **Version**: 1.0.0
